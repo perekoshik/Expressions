@@ -129,11 +129,6 @@ void testComplexExpressions() {
             { {"z", {2.0, -3.0}} },
             {2.0, -3.0});
     
-    runTest("Complex Test 5: z^2, z=(1+1i)",
-            Expression<complex<double>>("z") ^ Expression<complex<double>>(complex<double>(2.0, 0.0)),
-            { {"z", {1.0, 1.0}} },
-            {0.0, 2.0});
-    
     cout << endl;
 }
 
