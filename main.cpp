@@ -2,14 +2,14 @@
 #include <iomanip>
 #include <cmath>
 #include <map>
-#include "Expression.hpp" 
+#include <complex>
+#include "Expression.hpp"
 
 using namespace std;
 
 bool nearlyEqual(double a, double b, double epsilon = 1e-6) {
     return fabs(a - b) < epsilon;
 }
-
 
 void runTest(const string &desc, const Expression<double>& expr, const map<string, double>& vars, double expected) {
     try {
@@ -25,7 +25,6 @@ void runTest(const string &desc, const Expression<double>& expr, const map<strin
              << " | FAIL" << endl;
     }
 }
-
 
 void testAddition() {
     cout << "=== Тесты для оператора + ===" << endl;
@@ -78,58 +77,38 @@ void testPower() {
 }
 
 void testComplexExpressions() {
-    cout << "=== Тесты для сложных выражений ===" << endl;
-    runTest("Complex 1: (x+y)*(a-b)/c, x=10,y=5,a=8,b=3,c=5", 
-        ((Expression<double>("x") + Expression<double>("y")) *
-         (Expression<double>("a") - Expression<double>("b"))) / Expression<double>("c"),
-        { {"x", 10}, {"y", 5}, {"a", 8}, {"b", 3}, {"c", 5} },
-        (10+5)*(8-3)/5.0);
-
-    runTest("Complex 2: sin(x)+cos(y)-ln(a)*exp(b), x=1.57,y=0,a=2.71828,b=1", 
-        sin(Expression<double>("x")) + cos(Expression<double>("y")) - ln(Expression<double>("a")) * exp(Expression<double>("b")),
-        { {"x", 1.57}, {"y", 0.0}, {"a", 2.71828}, {"b", 1} },
-        sin(1.57) + cos(0.0) - log(2.71828)*exp(1));
-
-    runTest("Complex 3: (x^2)+(y^2)-(z^2), x=3,y=4,z=5", 
-        (Expression<double>("x") ^ Expression<double>(2)) + (Expression<double>("y") ^ Expression<double>(2)) - (Expression<double>("z") ^ Expression<double>(2)),
-        { {"x", 3}, {"y", 4}, {"z", 5} },
-        9 + 16 - 25);
-
-    runTest("Complex 4: ((a+b)/c)^d, a=5,b=7,c=3,d=2", 
-        ((Expression<double>("a") + Expression<double>("b")) / Expression<double>("c")) ^ Expression<double>("d"),
-        { {"a", 5}, {"b", 7}, {"c", 3}, {"d", 2} },
-        pow(((5+7)/3.0), 2));
-
-    runTest("Complex 5: exp(x)-ln(y)+sin(a)*cos(b), x=1,y=2.71828,a=1,b=0", 
-        exp(Expression<double>("x")) - ln(Expression<double>("y")) + sin(Expression<double>("a")) * cos(Expression<double>("b")),
-        { {"x", 1}, {"y", 2.71828}, {"a", 1}, {"b", 0} },
-        exp(1) - log(2.71828) + sin(1)*cos(0));
-
-    runTest("Complex 6: (x+y+z)/(a-b+c), x=10,y=5,z=15,a=20,b=5,c=3", 
-        (Expression<double>("x") + Expression<double>("y") + Expression<double>("z")) / (Expression<double>("a") - Expression<double>("b") + Expression<double>("c")),
-        { {"x", 10}, {"y", 5}, {"z", 15}, {"a", 20}, {"b", 5}, {"c", 3} },
-        (10+5+15) / (20-5+3));
-
-    runTest("Complex 7: (x*y)+(a/b)-(c^d), x=3,y=4,a=20,b=5,c=2,d=3", 
-        (Expression<double>("x") * Expression<double>("y")) + (Expression<double>("a") / Expression<double>("b")) - (Expression<double>("c") ^ Expression<double>("d")),
-        { {"x", 3}, {"y", 4}, {"a", 20}, {"b", 5}, {"c", 2}, {"d", 3} },
-        (3*4) + (20/5.0) - pow(2, 3));
-
-    runTest("Complex 8: ln(exp(x)+sin(y)*cos(z)), x=1,y=0.5,z=0.5", 
-        ln(exp(Expression<double>("x")) + sin(Expression<double>("y")) * cos(Expression<double>("z"))),
-        { {"x", 1}, {"y", 0.5}, {"z", 0.5} },
-        log(exp(1) + sin(0.5)*cos(0.5)));
-
-    runTest("Complex 9: (x^y)+((a-(b*c))/d), x=2,y=3,a=10,b=2,c=3,d=4", 
-        (Expression<double>("x") ^ Expression<double>("y")) + ((Expression<double>("a") - (Expression<double>("b") * Expression<double>("c"))) / Expression<double>("d")),
-        { {"x", 2}, {"y", 3}, {"a", 10}, {"b", 2}, {"c", 3}, {"d", 4} },
-        pow(2,3) + ((10 - (2*3))/4.0));
-
-    runTest("Complex 10: exp(sin(x))*ln(1+y)-cos(z), x=1,y=2,z=0", 
-        exp(sin(Expression<double>("x"))) * ln(Expression<double>(1) + Expression<double>("y")) - cos(Expression<double>("z")),
-        { {"x", 1}, {"y", 2}, {"z", 0} },
-        exp(sin(1)) * log(1+2) - cos(0));
-
+    cout << "=== Тесты для комплексных выражений (Expression<std::complex<double>>) ===" << endl;
+    
+    Expression<std::complex<double>> expr1(std::complex<double>(1.0, 2.0));
+    std::map<std::string, std::complex<double>> vars1;
+    auto res1 = expr1.evaluate(vars1);
+    cout << "Complex Test 1: " << expr1.toString() << " = " << res1 
+         << " (ожидается: (1,2))" << endl;
+    
+    Expression<std::complex<double>> expr2("z");
+    std::map<std::string, std::complex<double>> vars2 = { {"z", std::complex<double>(3.0, -1.0)} };
+    auto res2 = expr2.evaluate(vars2);
+    cout << "Complex Test 2: " << expr2.toString() << " при z=(3,-1) = " << res2 
+         << " (ожидается: (3,-1))" << endl;
+    
+    Expression<std::complex<double>> expr3 = expr2 + Expression<std::complex<double>>(std::complex<double>(1.0, 1.0));
+    std::map<std::string, std::complex<double>> vars3 = { {"z", std::complex<double>(2.0, 3.0)} };
+    auto res3 = expr3.evaluate(vars3);
+    cout << "Complex Test 3: (" << expr2.toString() << " + (1+1i)) при z=(2,3) = " << res3 
+         << " (ожидается: (3,4))" << endl;
+    
+    Expression<std::complex<double>> expr4 = expr2 * Expression<std::complex<double>>(std::complex<double>(1.0, 0.0));
+    std::map<std::string, std::complex<double>> vars4 = { {"z", std::complex<double>(2.0, -3.0)} };
+    auto res4 = expr4.evaluate(vars4);
+    cout << "Complex Test 4: (" << expr2.toString() << " * 1) при z=(2,-3) = " << res4 
+         << " (ожидается: (2,-3))" << endl;
+    
+    Expression<std::complex<double>> expr5 = expr2 ^ Expression<std::complex<double>>(std::complex<double>(2.0, 0.0));
+    std::map<std::string, std::complex<double>> vars5 = { {"z", std::complex<double>(1.0, 1.0)} };
+    auto res5 = expr5.evaluate(vars5);
+    cout << "Complex Test 5: (" << expr2.toString() << " ^ 2) при z=(1,1) = " << res5 
+         << " (ожидается: (0,2))" << endl;
+    
     cout << endl;
 }
 

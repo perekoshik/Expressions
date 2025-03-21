@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <complex>
+#include <type_traits>
 
 enum class ExprType {
     Constant,
@@ -75,7 +76,6 @@ public:
 
     Expression<T> substitute(const std::string &var, const Expression<T> &value) const;
 
-
     T evaluate(const std::map<std::string, T> &variables) const;
 
 private:
@@ -98,7 +98,6 @@ private:
         Node(UnaryOp op, std::shared_ptr<Node> operand)
             : type(ExprType::Unary), unOp(op), left(operand) {}
     };
-
 
     static Expression<T> createBinary(BinaryOp op, const Expression<T> &lhs, const Expression<T> &rhs);
     static Expression<T> createUnary(UnaryOp op, const Expression<T> &operand);

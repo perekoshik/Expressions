@@ -1,6 +1,7 @@
 #ifndef EXPRESSION_TPP
 #define EXPRESSION_TPP
 #include "Expression.hpp"
+
 template<typename T>
 Expression<T>::Expression(T value) {
     root = std::make_shared<Node>(value);
@@ -37,23 +38,24 @@ Expression<T>& Expression<T>::operator=(Expression<T> &&other) noexcept {
     return *this;
 }
 
-// Деструктор
 template<typename T>
 Expression<T>::~Expression() {
 }
 
-// Бинарный узел
+// Бинарый узел
 template<typename T>
 Expression<T> Expression<T>::createBinary(BinaryOp op, const Expression<T> &lhs, const Expression<T> &rhs) {
-    Expression<T> expr(0);
+    Expression<T> expr(T(0));
+
     expr.root = std::make_shared<Node>(op, lhs.root, rhs.root);
     return expr;
 }
 
-// Унарный
+// Унарный узел
 template<typename T>
 Expression<T> Expression<T>::createUnary(UnaryOp op, const Expression<T> &operand) {
-    Expression<T> expr(0);
+    Expression<T> expr(T(0));
+
     expr.root = std::make_shared<Node>(op, operand.root);
     return expr;
 }
@@ -97,8 +99,10 @@ T Expression<T>::evaluateNode(const std::shared_ptr<Node> &node, const std::map<
                 case UnaryOp::Sin: return std::sin(operandVal);
                 case UnaryOp::Cos: return std::cos(operandVal);
                 case UnaryOp::Ln:
-                    if (operandVal <= T(0)) {
-                        throw std::runtime_error("Логарифм от нуля или отрицательного числа не исчеслим");
+                    if constexpr (std::is_floating_point<T>::value) {
+                        if (operandVal <= T(0)) {
+                            throw std::runtime_error("Логарифм от нуля или отрицательного числа");
+                        }
                     }
                     return std::log(operandVal);
                 case UnaryOp::Exp: return std::exp(operandVal);
@@ -107,7 +111,7 @@ T Expression<T>::evaluateNode(const std::shared_ptr<Node> &node, const std::map<
             }
         }
         default:
-            throw std::runtime_error("Неизвестный тип узла?????");
+            throw std::runtime_error("Неизвестный тип узла");
     }
 }
 
@@ -142,7 +146,7 @@ std::shared_ptr<typename Expression<T>::Node> Expression<T>::substituteNode(cons
             return std::make_shared<Node>(node->unOp, operandSub);
         }
         default:
-            throw std::runtime_error("Неизвестный тип узла(подстановка)???");
+            throw std::runtime_error("Неизвестный тип узла (подстановка)");
     }
 }
 

@@ -1,6 +1,7 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -O2
-TARGET = test_expr
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 -MMD -I .
+
+TARGET = test
 SOURCES = main.cpp
 
 all: $(TARGET)
@@ -9,4 +10,4 @@ $(TARGET): $(SOURCES)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SOURCES)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) *.d
